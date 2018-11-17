@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+google-auth = "*"
+google-auth-oauthlib = "*"
+"google-auth-httplib2" = "*"
+google-api-python-client = "*"
+"oauth2client" = "*"
+
+[dev-packages]
+ipython = "*"
+
+[requires]
+python_version = "3.7"
