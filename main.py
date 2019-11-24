@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import pickle
+import subprocess
 import os.path
 
 from dotenv import load_dotenv
@@ -18,6 +19,13 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 load_dotenv(verbose=True)
 SHEET_ID = os.getenv('GSHEET_ID')
 SHEET_RANGE = os.getenv('GSHEET_RANGE')
+DOWNLAOD_PATH = os.getenv('TEMP_FOLDER')
+
+
+def download_video(url, path):
+    subprocess.run(['youtube-dl',
+                    "-o %s '%s'".format(path, url)],
+                   shell=True)
 
 
 def main():
@@ -43,8 +51,10 @@ def main():
     # Setup Sheet
     g_sheet_service = build('sheets', 'v4', credentials=creds)
     sheet = g_sheet_service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=SHEET_ID,
-                                range=SHEET_RANGE).execute()
+    result = sheet.values().get(
+        spreadsheetId=SHEET_ID,
+        range=SHEET_RANGE,
+    ).execute()
     sheet_values = result.get('values', [])
 
     if not sheet_values:
@@ -52,7 +62,19 @@ def main():
     else:
         print('Sheet Values:')
         for row in sheet_values:
-            print(row)
+            # print(row)
+            fileName = row[0]
+            url = None
+            if len(row) >= 7:
+                url = row[7]
+            print("file:%s uploaded:%s videoURL:%s" % (fileName, row[5], url))
+
+            filePath = '{}%(title)s.mp4'.format(DOWNLAOD_PATH)
+            if os.path.exists(filePath):
+                print('Upload %s' % (fileName))
+            elif url is not None:
+                print("Downlaod {}".format(url))
+                download_video(url, filePath)
 
 
 if __name__ == '__main__':
