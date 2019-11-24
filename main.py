@@ -13,14 +13,11 @@ from google.auth.transport.requests import Request
 
 import youtube_uploader
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
-          'https://www.googleapis.com/auth/drive.readonly',
-          'https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 load_dotenv(verbose=True)
 SHEET_ID = os.getenv('GSHEET_ID')
 SHEET_RANGE = os.getenv('GSHEET_RANGE')
-GDRIVE_ID = os.getenv('GDRIVE_ID')
 
 
 def main():
@@ -50,15 +47,6 @@ def main():
                                 range=SHEET_RANGE).execute()
     sheet_values = result.get('values', [])
 
-    # Setup GDrive
-    g_drive_service = build('drive', 'v3', credentials=creds)
-    results = g_drive_service.files().list(
-        fields='nextPageToken, files(id, name)',
-        includeItemsFromAllDrives=True,
-        driveId=GDRIVE_ID,
-    ).execute()
-    g_drive_values = results.get('files', [])
-
     if not sheet_values:
         print('No data found.')
     else:
@@ -66,9 +54,6 @@ def main():
         for row in sheet_values:
             print(row)
 
-        print('GDrive list:')
-        for item in g_drive_values:
-            print(u'{0} ({1})'.format(item['name'], item['id']))
 
 if __name__ == '__main__':
     main()
